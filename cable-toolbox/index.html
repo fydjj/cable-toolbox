@@ -1,73 +1,84 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0f766e">
-  <title>线缆工程小工具包 · 阻抗计算 (PWA)</title>
-  <link rel="manifest" href="./manifest.webmanifest">
-  <style>
-    :root{--bg:#0b1324;--card:#101a33;--text:#e5e7eb;--muted:#9ca3af;--accent:#0ea5a6;--danger:#ef4444}
-    html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#0b1324,#07101f);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-    .wrap{max-width:1080px;margin:24px auto;padding:0 16px}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-    header h1{font-size:20px;margin:0}
-    .card{background:var(--card);border:1px solid #1f2a44;border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-    fieldset{border:1px solid #203159;border-radius:10px;margin:0 0 12px 0;padding:12px}
-    legend{padding:0 8px;color:#cbd5e1}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .row .full{grid-column:1/-1}
-    label{display:block;font-size:12px;color:var(--muted)}
-    input, select{width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid #223257;background:#0b172f;color:var(--text)}
-    input.is-default{ color:#cbd5e1 }
-    input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(14,165,166,.25)}
-    .btn{padding:8px 12px;border-radius:8px;border:1px solid #1e2a48;background:#0e1a37;color:var(--text);cursor:pointer}
-    .btn.primary{background:var(--accent);border-color:#0d8b8c;color:#062b2c}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .stat{background:#0c1a33;border:1px solid #1a2b4d;border-radius:10px;padding:10px}
-    .stat .v{font-size:18px;color:#a7f3d0}
-    .sub{font-size:12px;color:var(--muted)}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .note{font-size:12px;color:#a3b2c2;margin:6px 0 12px}
-    footer{opacity:.6;font-size:12px;margin-top:8px}
-    .disabled{opacity:.6;filter:grayscale(0.3)}
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>线缆工具箱</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>线缆工程小工具包 · 阻抗计算</h1>
-      <div>
-        <button class="btn" id="btn-export">导出JSON</button>
-        <label class="btn" for="importFile">导入JSON</label>
-        <input id="importFile" type="file" accept="application/json" style="display:none" />
-      </div>
-    </header>
-
-    <div class="card">
-      <div class="note">本页计算四组（VBUS / GND / 内层缠绕 / 外层缠绕）的几何与电阻参数。单位：直径=mm，长度=m，电阻率输入单位为“×10⁻⁸ Ω·m”。绞合外径采用填充系数模型：D≈d·√(N/η)，默认 η=0.90。</div>
+<header>
+  <h1 class="title">线缆工具箱</h1>
+</header>
+<main>
+  <section class="summary" id="summary">
+    <div class="chip">
+      <h3>VBUS 最终阻抗（含接触）</h3>
+      <div class="val"><span id="sum_vbus">-</span><span class="unit"> mΩ</span></div>
     </div>
-
-    <div id="groups" class="grid2"></div>
-
-    <div id="combined" class="card">
-      <fieldset>
-        <legend>缠绕总接触阻抗（仅在“有外层缠绕”时使用）</legend>
-        <div class="row">
-          <div class="full">
-            <label>缠绕接触阻抗 (mΩ)</label>
-            <input id="twistContactTotal" type="number" min="0" step="0.01">
-          </div>
-        </div>
-      </fieldset>
+    <div class="chip">
+      <h3>GND//缠绕 阻抗（并联，含接触）</h3>
+      <div class="val"><span id="sum_gw">-</span><span class="unit"> mΩ</span></div>
     </div>
+  </section>
 
-    <footer class="wrap">
-      <div class="note">PWA：已支持离线。数据保存在本机浏览器（localStorage），可用“导出/导入”进行备份与迁移。</div>
-    </footer>
+  <div class="actions">
+    <button id="fillDefaults">填充默认值</button>
+    <button id="resetAll">清空</button>
   </div>
 
-  <script src="./app.js" defer></script>
+  <div class="grid" id="groups"></div>
+
+  <details>
+    <summary>算法与公式（展开查看）</summary>
+    <div class="muted" style="margin-top:6px">
+      <div>外径 D ≈ 1.15 · d · √N（mm）</div>
+      <div>截面积 A = π · (d/2)² · N（mm²）</div>
+      <div>A(m²) = A(mm²)/10⁶，ρ(Ω·m) = ρ输入 × 10⁻⁸</div>
+      <div>单位电阻 r(mΩ/m) = [ ρ / (A(m²) · K) ] × 10³</div>
+      <div>总电阻 R(mΩ) = [ ρ · L / (A(m²) · K) ] × 10³</div>
+      <div>接触开：R_out = R + R_c； 关：R_out = R</div>
+    </div>
+  </details>
+
+  <p class="footer">有问题请反馈至邓佳隽<br/>邮箱：fy_djj@outlook.com</p>
+</main>
+
+<template id="groupTemplate">
+  <div class="card group">
+    <h2 class="title"></h2>
+    <div class="row"><label>绞合根数 N</label><input type="number" step="1" min="1" class="inpN" placeholder="必填"/><span class="unit">根</span></div>
+    <div class="row"><label>单根直径 d</label><input type="number" step="0.01" min="0" class="inpD" /><span class="unit">mm</span></div>
+    <div class="row"><label>导体长度 L</label><input type="number" step="0.01" min="0" class="inpL" /><span class="unit">m</span></div>
+    <div class="row"><label>绞合后根数 K</label><input type="number" step="1" min="1" class="inpK" /><span class="unit">股</span></div>
+    <div class="row"><label>电阻率 ρ</label><input type="number" step="0.01" min="0" class="inpRho" /><span class="unit">×10⁻⁸ Ω·m</span></div>
+
+    <div class="row switch">
+      <div class="controls">
+        <div class="modes">
+          <label class="seg"><input type="radio" class="contactMode" value="bare"><span>裸线</span></label>
+          <label class="seg"><input type="radio" class="contactMode" value="finished"><span>成品</span></label>
+        </div>
+        <div class="rcwrap">
+          <span class="rc">接触阻抗</span>
+          <input type="number" step="0.01" min="0" class="inpRc" />
+          <span class="unit">mΩ</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="err" aria-live="polite"></div>
+
+    <div class="out">
+      <div class="kv"><span>绞合外径 D</span><strong class="outD">-</strong><span class="unit">mm</span></div>
+      <div class="kv"><span>截面积 A</span><strong class="outAmm2">-</strong><span class="unit">mm²</span></div>
+      <div class="kv"><span>单位电阻 r</span><strong class="outRunit">-</strong><span class="unit">mΩ/m</span></div>
+      <div class="kv"><span>总电阻 R（不含接触）</span><strong class="outR">-</strong><span class="unit">mΩ</span></div>
+      <div class="kv"><span>R_out（含接触）</span><strong class="outRout">-</strong><span class="unit">mΩ</span></div>
+    </div>
+  </div>
+</template>
+
+<script src="./app.js"></script>
 </body>
 </html>
