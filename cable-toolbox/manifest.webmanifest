@@ -1,9 +1,0 @@
-{
-  "name": "线缆工程小工具包",
-  "short_name": "CableBox",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#0b1324",
-  "theme_color": "#0f766e",
-  "icons": []
-}
