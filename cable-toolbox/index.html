@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f766e">
+  <title>线缆工程小工具包 · 阻抗计算 (PWA)</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <style>
+    :root{--bg:#0b1324;--card:#101a33;--text:#e5e7eb;--muted:#9ca3af;--accent:#0ea5a6;--danger:#ef4444}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b1324,#07101f);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .wrap{max-width:1080px;margin:24px auto;padding:0 16px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    header h1{font-size:20px;margin:0}
+    .card{background:var(--card);border:1px solid #1f2a44;border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+    fieldset{border:1px solid #203159;border-radius:10px;margin:0 0 12px 0;padding:12px}
+    legend{padding:0 8px;color:#cbd5e1}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .row .full{grid-column:1/-1}
+    label{display:block;font-size:12px;color:var(--muted)}
+    input, select{width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid #223257;background:#0b172f;color:var(--text)}
+    input.is-default{ color:#cbd5e1 }
+    input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(14,165,166,.25)}
+    .btn{padding:8px 12px;border-radius:8px;border:1px solid #1e2a48;background:#0e1a37;color:var(--text);cursor:pointer}
+    .btn.primary{background:var(--accent);border-color:#0d8b8c;color:#062b2c}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .stat{background:#0c1a33;border:1px solid #1a2b4d;border-radius:10px;padding:10px}
+    .stat .v{font-size:18px;color:#a7f3d0}
+    .sub{font-size:12px;color:var(--muted)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .note{font-size:12px;color:#a3b2c2;margin:6px 0 12px}
+    footer{opacity:.6;font-size:12px;margin-top:8px}
+    .disabled{opacity:.6;filter:grayscale(0.3)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>线缆工程小工具包 · 阻抗计算</h1>
+      <div>
+        <button class="btn" id="btn-export">导出JSON</button>
+        <label class="btn" for="importFile">导入JSON</label>
+        <input id="importFile" type="file" accept="application/json" style="display:none" />
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="note">本页计算四组（VBUS / GND / 内层缠绕 / 外层缠绕）的几何与电阻参数。单位：直径=mm，长度=m，电阻率输入单位为“×10⁻⁸ Ω·m”。绞合外径采用填充系数模型：D≈d·√(N/η)，默认 η=0.90。</div>
+    </div>
+
+    <div id="groups" class="grid2"></div>
+
+    <div id="combined" class="card">
+      <fieldset>
+        <legend>缠绕总接触阻抗（仅在“有外层缠绕”时使用）</legend>
+        <div class="row">
+          <div class="full">
+            <label>缠绕接触阻抗 (mΩ)</label>
+            <input id="twistContactTotal" type="number" min="0" step="0.01">
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <footer class="wrap">
+      <div class="note">PWA：已支持离线。数据保存在本机浏览器（localStorage），可用“导出/导入”进行备份与迁移。</div>
+    </footer>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
