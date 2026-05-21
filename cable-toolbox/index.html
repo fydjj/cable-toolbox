@@ -9,75 +9,160 @@
 <body>
 <header>
   <h1 class="title">线缆工具箱</h1>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-target="tab-dc" role="tab" aria-selected="true">直流阻抗</button>
+    <button class="tab" data-target="tab-z0" role="tab" aria-selected="false">特性阻抗</button>
+  </nav>
 </header>
 <main>
-  <section class="summary" id="summary">
-    <div class="chip">
-      <h3>VBUS 最终阻抗（含接触）</h3>
-      <div class="val"><span id="sum_vbus">-</span><span class="unit"> mΩ</span></div>
+  <section class="tab-pane active" id="tab-dc" role="tabpanel">
+    <section class="summary" id="summary">
+      <div class="chip">
+        <h3>VBUS 最终阻抗（含接触）</h3>
+        <div class="val"><span id="sum_vbus">-</span><span class="unit"> mΩ</span></div>
+      </div>
+      <div class="chip">
+        <h3>GND//缠绕 阻抗（并联，含接触）</h3>
+        <div class="val"><span id="sum_gw">-</span><span class="unit"> mΩ</span></div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button id="fillDefaults">填充默认值</button>
+      <button id="resetAll">清空</button>
     </div>
-    <div class="chip">
-      <h3>GND//缠绕 阻抗（并联，含接触）</h3>
-      <div class="val"><span id="sum_gw">-</span><span class="unit"> mΩ</span></div>
-    </div>
-  </section>
 
-  <div class="actions">
-    <button id="fillDefaults">填充默认值</button>
-    <button id="resetAll">清空</button>
-  </div>
+    <div class="grid" id="groups"></div>
 
-  <div class="grid" id="groups"></div>
+    <details>
+      <summary>算法与公式（展开查看）</summary>
+      <div class="muted" style="margin-top:6px">
+        <div>外径 D ≈ 1.15 · d · √N（mm）</div>
+        <div>截面积 A = π · (d/2)² · N（mm²）</div>
+        <div>A(m²) = A(mm²)/10⁶，ρ(Ω·m) = ρ输入 × 10⁻⁸</div>
+        <div>单位电阻 r(mΩ/m) = [ ρ / (A(m²) · K) ] × 10³</div>
+        <div>总电阻 R(mΩ) = [ ρ · L / (A(m²) · K) ] × 10³</div>
+        <div>接触开：R_out = R + R_c； 关：R_out = R</div>
+      </div>
+    </details>
 
-  <details>
-    <summary>算法与公式（展开查看）</summary>
-    <div class="muted" style="margin-top:6px">
-      <div>外径 D ≈ 1.15 · d · √N（mm）</div>
-      <div>截面积 A = π · (d/2)² · N（mm²）</div>
-      <div>A(m²) = A(mm²)/10⁶，ρ(Ω·m) = ρ输入 × 10⁻⁸</div>
-      <div>单位电阻 r(mΩ/m) = [ ρ / (A(m²) · K) ] × 10³</div>
-      <div>总电阻 R(mΩ) = [ ρ · L / (A(m²) · K) ] × 10³</div>
-      <div>接触开：R_out = R + R_c； 关：R_out = R</div>
-    </div>
-  </details>
+    <p class="footer">有问题请反馈至邓佳隽<br/>邮箱：fy_djj@outlook.com</p>
 
-  <p class="footer">有问题请反馈至邓佳隽<br/>邮箱：fy_djj@outlook.com</p>
-</main>
+    <template id="groupTemplate">
+      <div class="card group">
+        <h2 class="title"></h2>
+        <div class="row"><label>绞合根数 N</label><input type="number" step="1" min="1" class="inpN" placeholder="必填"/><span class="unit">根</span></div>
+        <div class="row"><label>单根直径 d</label><input type="number" step="0.01" min="0" class="inpD" /><span class="unit">mm</span></div>
+        <div class="row"><label>导体长度 L</label><input type="number" step="0.01" min="0" class="inpL" /><span class="unit">m</span></div>
+        <div class="row"><label>绞合后根数 K</label><input type="number" step="1" min="1" class="inpK" /><span class="unit">股</span></div>
+        <div class="row"><label>电阻率 ρ</label><input type="number" step="0.01" min="0" class="inpRho" /><span class="unit">×10⁻⁸ Ω·m</span></div>
 
-<template id="groupTemplate">
-  <div class="card group">
-    <h2 class="title"></h2>
-    <div class="row"><label>绞合根数 N</label><input type="number" step="1" min="1" class="inpN" placeholder="必填"/><span class="unit">根</span></div>
-    <div class="row"><label>单根直径 d</label><input type="number" step="0.01" min="0" class="inpD" /><span class="unit">mm</span></div>
-    <div class="row"><label>导体长度 L</label><input type="number" step="0.01" min="0" class="inpL" /><span class="unit">m</span></div>
-    <div class="row"><label>绞合后根数 K</label><input type="number" step="1" min="1" class="inpK" /><span class="unit">股</span></div>
-    <div class="row"><label>电阻率 ρ</label><input type="number" step="0.01" min="0" class="inpRho" /><span class="unit">×10⁻⁸ Ω·m</span></div>
-
-    <div class="row switch">
-      <div class="controls">
-        <div class="modes">
-          <label class="seg"><input type="radio" class="contactMode" value="bare"><span>裸线</span></label>
-          <label class="seg"><input type="radio" class="contactMode" value="finished"><span>成品</span></label>
+        <div class="row switch">
+          <div class="controls">
+            <div class="modes">
+              <label class="seg"><input type="radio" class="contactMode" value="bare"><span>裸线</span></label>
+              <label class="seg"><input type="radio" class="contactMode" value="finished"><span>成品</span></label>
+            </div>
+            <div class="rcwrap">
+              <span class="rc">接触阻抗</span>
+              <input type="number" step="0.01" min="0" class="inpRc" />
+              <span class="unit">mΩ</span>
+            </div>
+          </div>
         </div>
-        <div class="rcwrap">
-          <span class="rc">接触阻抗</span>
-          <input type="number" step="0.01" min="0" class="inpRc" />
-          <span class="unit">mΩ</span>
+
+        <div class="err" aria-live="polite"></div>
+
+        <div class="out">
+          <div class="kv"><span>绞合外径 D</span><strong class="outD">-</strong><span class="unit">mm</span></div>
+          <div class="kv"><span>截面积 A</span><strong class="outAmm2">-</strong><span class="unit">mm²</span></div>
+          <div class="kv"><span>单位电阻 r</span><strong class="outRunit">-</strong><span class="unit">mΩ/m</span></div>
+          <div class="kv"><span>总电阻 R（不含接触）</span><strong class="outR">-</strong><span class="unit">mΩ</span></div>
+          <div class="kv"><span>R_out（含接触）</span><strong class="outRout">-</strong><span class="unit">mΩ</span></div>
         </div>
       </div>
-    </div>
+    </template>
+  </section>
 
-    <div class="err" aria-live="polite"></div>
+  <section class="tab-pane" id="tab-z0" role="tabpanel">
+    <nav class="subtabs" role="tablist">
+      <button class="subtab active" data-target="model-coax" role="tab" aria-selected="true">同轴线</button>
+      <button class="subtab" data-target="model-diffpair" role="tab" aria-selected="false">绞对</button>
+      <button class="subtab" data-target="model-microstrip" role="tab" aria-selected="false">微带线</button>
+      <button class="subtab" data-target="model-stripline" role="tab" aria-selected="false">带状线</button>
+      <button class="subtab" data-target="model-shielded-dp" role="tab" aria-selected="false">屏蔽绞对</button>
+    </nav>
 
-    <div class="out">
-      <div class="kv"><span>绞合外径 D</span><strong class="outD">-</strong><span class="unit">mm</span></div>
-      <div class="kv"><span>截面积 A</span><strong class="outAmm2">-</strong><span class="unit">mm²</span></div>
-      <div class="kv"><span>单位电阻 r</span><strong class="outRunit">-</strong><span class="unit">mΩ/m</span></div>
-      <div class="kv"><span>总电阻 R（不含接触）</span><strong class="outR">-</strong><span class="unit">mΩ</span></div>
-      <div class="kv"><span>R_out（含接触）</span><strong class="outRout">-</strong><span class="unit">mΩ</span></div>
-    </div>
-  </div>
-</template>
+    <section class="summary" id="summary-z0">
+      <div class="chip">
+        <h3>同轴线 Z0</h3>
+        <div class="val"><span id="sum_coax_z0">-</span><span class="unit"> Ω</span></div>
+      </div>
+    </section>
+
+    <section class="model-pane active" id="model-coax" role="tabpanel">
+      <div class="actions">
+        <button id="fillCoaxDefaults">填充默认值</button>
+        <button id="resetCoax">清空</button>
+      </div>
+
+      <div class="grid">
+        <div class="card" id="card-coax">
+          <h2 class="title">同轴线模型</h2>
+          <div class="coax-grid">
+            <div class="coax-form">
+              <div class="row"><label>内部导体绞合外径 d</label><input id="inpCoax_d" type="number" step="0.01" min="0"/><span class="unit">mm</span></div>
+              <div class="row"><label>单根导体直径 do</label><input id="inpCoax_do" type="number" step="0.01" min="0"/><span class="unit">mm</span></div>
+              <div class="row"><label>有效屏蔽厚度 dw</label><input id="inpCoax_dw" type="number" step="0.001" min="0"/><span class="unit">mm</span></div>
+              <div class="row"><label>绝缘体外径 D</label><input id="inpCoax_D" type="number" step="0.01" min="0"/><span class="unit">mm</span></div>
+              <div class="row"><label>绝缘体介电常数 ε</label><input id="inpCoax_eps" type="number" step="0.01" min="0.1"/><span class="unit"></span></div>
+              <div class="row"><label>内部导体绞合系数 K1</label><input id="inpCoax_K1" type="number" step="0.001" min="0.1" max="1.0"/><span class="unit"></span></div>
+            </div>
+            <aside class="coax-imgs">
+              <figure>
+                <img src="./img/绞合系数对照表.png" alt="绞合系数对照表" />
+                <figcaption class="muted">绞合系数对照表（参考）</figcaption>
+              </figure>
+              <figure>
+                <img src="./img/同轴线模型.png" alt="同轴线模型示意" />
+                <figcaption class="muted">同轴线模型示意</figcaption>
+              </figure>
+            </aside>
+          </div>
+
+          <div class="err" id="errCoax" aria-live="polite"></div>
+
+          <div class="out">
+            <div class="kv"><span>Z0（自然对数）</span><strong id="outCoaxZ0">-</strong><span class="unit">Ω</span></div>
+          </div>
+
+          <details class="formula-block">
+            <summary>查看该模型的数学公式</summary>
+            <div class="muted" style="margin-top:6px">
+              <div>几何有效外径：D<sub>eff</sub> = D + 1.5·dw（单位：mm）</div>
+              <div>同轴线特性阻抗（自然对数）：Z<sub>0</sub> = (60/√ε) · ln(D<sub>eff</sub> / (K1·d))</div>
+              <div>等价换底（常用十进对数）：Z<sub>0</sub> = (138/√ε) · log<sub>10</sub>(D<sub>eff</sub> / (K1·d))</div>
+              <div>几何约束：D<sub>eff</sub> &gt; K1·d（否则 Z<sub>0</sub> 非物理）</div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="model-pane" id="model-diffpair" role="tabpanel">
+      <div class="grid"><div class="card"><h2 class="title">绞对模型</h2><div class="muted">未开发</div></div></div>
+    </section>
+    <section class="model-pane" id="model-microstrip" role="tabpanel">
+      <div class="grid"><div class="card"><h2 class="title">微带线模型</h2><div class="muted">未开发</div></div></div>
+    </section>
+    <section class="model-pane" id="model-stripline" role="tabpanel">
+      <div class="grid"><div class="card"><h2 class="title">带状线模型</h2><div class="muted">未开发</div></div></div>
+    </section>
+    <section class="model-pane" id="model-shielded-dp" role="tabpanel">
+      <div class="grid"><div class="card"><h2 class="title">屏蔽绞对模型</h2><div class="muted">未开发</div></div></div>
+    </section>
+  </section>
+</main>
 
 <script src="./app.js"></script>
 </body>

@@ -22,6 +22,17 @@ header{
   border-bottom:1px solid var(--border);
   background:linear-gradient(180deg, #0f1b2f 0%, #0b1220 100%);
 }
+
+/* 选项卡 */
+.tabs{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.tab{
+  border:1px solid var(--border);color:var(--fg);background:var(--panel-2);
+  border-radius:999px;padding:6px 12px;cursor:pointer;
+}
+.tab.active{border-color:#1e7186;box-shadow:0 0 0 1px rgba(34,211,238,.18);background:#0f2538}
+
+.tab-pane{display:none}
+.tab-pane.active{display:block}
 body.mode-bare header{}
 body.mode-finished header{}
 .switch .seg{}
@@ -31,7 +42,7 @@ header .title{
 header .title::before{
   content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 16px var(--accent)
 }
-main{max-width:1060px;margin:0 auto;padding:20px}
+main{max-width:1160px;margin:0 auto;padding:20px}
 
 .summary{
   display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 16px;
@@ -99,6 +110,20 @@ button:disabled{opacity:.6;cursor:not-allowed}
 .out .kv strong{color:#e6fbff}
 
 .footer{margin-top:24px;color:var(--sub)}
+
+/* 特性阻抗-同轴线 */
+.coax-grid{display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start}
+.coax-imgs figure{margin:0 0 12px}
+.coax-imgs img{max-width:100%;height:auto;border:1px solid var(--border);border-radius:8px;background:#0b1527}
+.coax-form .row{margin:8px 0}
+
+/* 子选项卡（特性阻抗模型切换） */
+.subtabs{margin:10px 0 12px;display:flex;gap:8px;flex-wrap:wrap}
+.subtab{border:1px solid var(--border);color:var(--fg);background:var(--panel-2);border-radius:999px;padding:6px 12px;cursor:pointer}
+.subtab.active{border-color:#1e7186;box-shadow:0 0 0 1px rgba(34,211,238,.18);background:#0f2538}
+.model-pane{display:none}
+.model-pane.active{display:block}
+.formula-block{margin-top:12px}
 
 /* 小屏优化 */
 @media (max-width:480px){
